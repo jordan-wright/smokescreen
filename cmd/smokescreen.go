@@ -65,6 +65,7 @@ func NewConfiguration(args []string, logger *log.Logger) (*smokescreen.Config, e
 			Name:  "proxy-protocol",
 			Usage: "Enable PROXY protocol support.",
 		},
+		&cli.BoolFlag{Name: "observe-tunnel-handshake", Usage: "Enable experimental passive TLS/SSH metadata in CONNECT close logs"},
 		&cli.BoolFlag{
 			Name:  "allow-self-connections",
 			Usage: "Allow connections to local interface addresses on all ports, subject to normal IP and ACL checks (default: false).",
@@ -263,6 +264,7 @@ func NewConfiguration(args []string, logger *log.Logger) (*smokescreen.Config, e
 			conf.SupportProxyProtocol = c.Bool("proxy-protocol")
 		}
 
+		conf.ObserveTunnelHandshake = c.Bool("observe-tunnel-handshake")
 		if c.IsSet("allow-self-connections") {
 			conf.AllowSelfConnections = c.Bool("allow-self-connections")
 		}

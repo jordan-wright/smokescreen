@@ -23,6 +23,7 @@ const (
 
 type InstrumentedConn struct {
 	net.Conn
+	Observer     *WireObserver
 	Role         string
 	Project      string
 	OutboundHost string
@@ -126,7 +127,11 @@ func (ic *InstrumentedConn) Close() error {
 		errorMessage = ic.ConnError.Error()
 	}
 
-	ic.logger.WithFields(logrus.Fields{
+	logger := ic.logger
+	if ic.Observer != nil {
+		logger = logger.WithFields(ic.Observer.Fields())
+	}
+	logger.WithFields(logrus.Fields{
 		LogFieldBytesIn:      atomic.LoadUint64(ic.BytesIn),
 		LogFieldBytesOut:     atomic.LoadUint64(ic.BytesOut),
 		LogFieldEndTime:      end.UTC(),
@@ -152,6 +157,9 @@ func (ic *InstrumentedConn) Read(b []byte) (int, error) {
 
 	n, err := ic.Conn.Read(b)
 	atomic.AddUint64(ic.BytesIn, uint64(n))
+	if ic.Observer != nil {
+		ic.Observer.Server(b[:n])
+	}
 
 	return n, err
 }
@@ -168,6 +176,9 @@ func (ic *InstrumentedConn) Write(b []byte) (int, error) {
 
 	n, err := ic.Conn.Write(b)
 	atomic.AddUint64(ic.BytesOut, uint64(n))
+	if ic.Observer != nil {
+		ic.Observer.Client(b[:n])
+	}
 
 	return n, err
 }

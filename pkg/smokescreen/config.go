@@ -83,9 +83,11 @@ type DialErrorEvent struct {
 }
 
 type Config struct {
-	Ip       string
-	Port     uint16
-	Listener net.Listener
+	// ObserveTunnelHandshake enables experimental passive CONNECT telemetry.
+	ObserveTunnelHandshake bool
+	Ip                     string
+	Port                   uint16
+	Listener               net.Listener
 	// MostSpecificIPRules selects longest-prefix precedence; false preserves allow-first.
 	MostSpecificIPRules          bool
 	DenyRanges                   []RuleRange
